@@ -1,0 +1,64 @@
+package client_back1.demo.entity;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+@Data
+@Entity
+@NoArgsConstructor
+@JsonIdentityInfo(
+		generator = ObjectIdGenerators.PropertyGenerator.class,
+		property = "id")
+public class Quotation {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
+	@OneToOne(fetch = FetchType.LAZY)
+	//@JoinColumn(name = "doctor_id")
+	@JoinColumn(name = "id_doc", referencedColumnName = "id")
+	private Doctor doctor;
+	@OneToMany(cascade = CascadeType.ALL,
+			fetch = FetchType.LAZY, orphanRemoval = true,
+			mappedBy = "cart")
+	private Set<ProductInOrder> products = new HashSet<>();
+
+	@OneToOne(cascade = CascadeType.MERGE)
+	@PrimaryKeyJoinColumn
+	private Date_Quotation date_quotation;
+
+	public Quotation(Doctor doctor) {
+		this.doctor = doctor;
+	}
+
+
+	public Set<ProductInOrder> getProducts() {
+		return products;
+	}
+
+	public void setProducts(Set<ProductInOrder> products) {
+		this.products = products;
+	}
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public long getId() {
+		return this.id;
+	}
+
+
+	public Date_Quotation getDate_quotation() {
+		return date_quotation;
+	}
+
+	public void setDate_quotation(Date_Quotation date_quotation) {
+		this.date_quotation = date_quotation;
+	}
+}

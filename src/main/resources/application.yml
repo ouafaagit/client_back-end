@@ -1,0 +1,38 @@
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    platform: mysql
+    hikari:
+      poolName: Hikari
+      auto-commit: true
+    url: jdbc:mysql://localhost:3306/db_client?createDatabaseIfNotExist=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
+        jdbc:
+          time_zone: UTC
+  queries:
+    users-query: select email, password,active from user  where email=?
+    roles-query: select email, role from user where email=?
+#server:
+#  servlet:
+#    contextPath: /api
+# spring.datasource.username = <yourUserName>
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 15MB
+
+
+
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false

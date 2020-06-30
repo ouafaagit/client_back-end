@@ -1,0 +1,15 @@
+package client_back1.demo.service;
+
+import client_back1.demo.entity.Provider;
+import client_back1.demo.entity.Quotation;
+
+public interface QuotationService {
+    Object save(Quotation quotation);
+
+    Quotation getQuotation(long id);
+
+ /* Quotation getCart(User user);
+    void mergeLocalCart(Collection<ProductInOrder> productInOrders, User user);
+    void delete(String itemId, User user);
+    void checkout(User user);*/
+}
