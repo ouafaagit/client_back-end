@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @Service
@@ -86,7 +83,7 @@ public class ProviderServiceImpl implements ProviderService {
         if(p==null){
             return null;
         }
-        List<Speciality> l =new ArrayList<>();
+        Set<Speciality> l =new HashSet<>();
         List<Product> ll =new ArrayList<>();
         p.setSpecialities(l);
         System.out.println("profile get"+p.getFirstname()+p.getLastname());
@@ -128,19 +125,21 @@ public class ProviderServiceImpl implements ProviderService {
     //speciality
     public List<Speciality> findAllspeprovider(long id){
         Provider pro=providerRepository.findByIdAndStatus(id,1);
-        List<Speciality>  l=pro.getSpecialities();
         List<Speciality>  ll=new ArrayList<Speciality>();
-        for ( int j=0;j<l.size();j++)
-        {   Speciality ss=new Speciality();
-            ss.setName(l.get(j).getName());
-            ss.setId(l.get(j).getId());
-            ss.setPriceSpeciality(l.get(j).getPriceSpeciality());
+            Iterator<Speciality> it =pro.getSpecialities().iterator();
+            while (it.hasNext())
+            {
+                Speciality s=it.next();
+            Speciality ss=new Speciality();
+            ss.setName(s.getName());
+            ss.setId(s.getId());
+            ss.setPriceSpeciality(s.getPriceSpeciality());
             ll.add(ss);
-            // System.out.println("$$$$$"+ll.get(j).getName());
-
         }
         return ll;
     }
+
+
     //add specialitys
   /*  @Override
     public Provider updatelistsp(long id, Speciality sp)  {

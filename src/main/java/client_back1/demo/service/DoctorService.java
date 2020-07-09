@@ -1,9 +1,13 @@
 package client_back1.demo.service;
 
 import client_back1.demo.entity.Doctor;
+import client_back1.demo.entity.ProductInOrder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.Collection;
 import java.util.List;
 
 
@@ -23,7 +27,11 @@ public interface DoctorService {
 
 
 
-    List<Doctor> findAll();
+    Page<Doctor> findAll(Pageable pageable);
+
+    void deleteitem(String itemId, Doctor user);
+
+    List<ProductInOrder> mergeLocalwish(Collection<ProductInOrder> productInOrders, String name);
 
 
 //        this.initDB();

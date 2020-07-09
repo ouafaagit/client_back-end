@@ -11,6 +11,8 @@ import client_back1.demo.service.ProductService;
 import client_back1.demo.vo.request.cardproduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -41,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
     }
     //all product card
     @Override
-    public List<cardproduct> findAllproducts() {
+    public Page<cardproduct> findAllproducts(Pageable pageable) {
         List<Product> products=productRepository.findAllByBlockedFalse();
        ImageModel  img= new ImageModel();
         List<cardproduct> cardproducts= new ArrayList<>();
@@ -57,20 +60,24 @@ public class ProductServiceImpl implements ProductService {
 
             cardproducts.add(cardproduct);
             }
-        return cardproducts;
+
+        return new PageImpl<>(cardproducts, pageable, cardproducts.size());
     }
 
     //all product card
     @Override
-    public List<cardproduct> findAllbysp(long id) {
-        List<Product> products=productRepository.findAllByBlockedIsFalseAndSpeciality_Id(id);
-        ImageModel  img= new ImageModel();
-        List<cardproduct> cardproducts= new ArrayList<>();
-        for(int i=0;i<products.size();i++)
-        {       cardproduct  cardproduct=new cardproduct(products.get(i));
-            if (products.get(i).getPr_images().get(0)!=null) {
-                img = imageService.findById(products.get(i).getPr_images().get(0).getId());
-
+    public List<cardproduct> findAllbysp(long id,Pageable pageable) {
+        Page<Product> products=productRepository.findAllByBlockedIsFalseAndSpeciality_Id(id,pageable);
+        System.out.println(" findAllbysp"+products.toString());
+        List<cardproduct> cardproducts=new ArrayList<>();
+        Iterator<Product> it =products.iterator();
+        while (it.hasNext())
+        {
+            Product Product=it.next();
+            cardproduct  cardproduct=new cardproduct(Product);
+            if (Product.getPr_images().get(0)!=null) {
+                ImageModel  img= new ImageModel();
+                img = imageService.findById(Product.getPr_images().get(0).getId());
                 // products.get(i).setPr_images(new ArrayList<ImageModel>() );
                 //  products.get(i).getPr_images().add(img);
                 cardproduct.setPicByte(img.getPicByte());
@@ -83,16 +90,19 @@ public class ProductServiceImpl implements ProductService {
 
     //all new product card
     @Override
-    public List<cardproduct> Allnewprod() {
-        List<Product> products=productRepository.findAllByBlockedFalseAndAndNombreVueLessThanEqual(200);
+    public List<cardproduct> Allnewprod(Pageable pageable) {
+        Page<Product> products=productRepository.findAllByBlockedFalseAndAndNombreVueLessThanEqual(200,pageable);
         System.out.println(" Allnewprod"+products.toString());
-        ImageModel  img= new ImageModel();
-        List<cardproduct> cardproducts= new ArrayList<>();
-        for(int i=0;i<products.size();i++)
-        {       cardproduct  cardproduct=new cardproduct(products.get(i));
-            if (products.get(i).getPr_images().get(0)!=null) {
-                img = imageService.findById(products.get(i).getPr_images().get(0).getId());
-
+      //  Page<cardproduct> cardproducts= PageRequest.of(1, 3);
+        List<cardproduct> cardproducts=new ArrayList<>();
+        Iterator<Product> it =products.iterator();
+        while (it.hasNext())
+        {
+            Product Product=it.next();
+            cardproduct  cardproduct=new cardproduct(Product);
+            if (Product.getPr_images().get(0)!=null) {
+                ImageModel  img= new ImageModel();
+                img = imageService.findById(Product.getPr_images().get(0).getId());
                 // products.get(i).setPr_images(new ArrayList<ImageModel>() );
                 //  products.get(i).getPr_images().add(img);
                 cardproduct.setPicByte(img.getPicByte());
@@ -100,6 +110,9 @@ public class ProductServiceImpl implements ProductService {
 
             cardproducts.add(cardproduct);
         }
+
+
+
         return cardproducts;
     }
     /// One product for user and provider
@@ -114,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
         s.setName(p.getSpeciality().getName());
         s.setId(p.getSpeciality().getId());
         product.setSpeciality(s);
-        System.out.println("speciality :"+product.getSpeciality());
+      //  System.out.println("speciality :"+product.getSpeciality());
         product.setId(p.getId());
         product.setName(p.getName());
         product.setDescription(p.getDescription());
@@ -122,7 +135,7 @@ public class ProductServiceImpl implements ProductService {
         product.setCatalogue(p.getCatalogue());
         product.setMarque(p.getMarque());
         product.setNombreVue(n);
-        System.out.println("nbr vue"+product.getNombreVue());
+        //System.out.println("nbr vue"+product.getNombreVue());
         product.setNombrewish(p.getNombrewish());
             for(int i=0;i<p.getPr_images().size();i++) {
                 ImageModel  img= new ImageModel();
@@ -133,16 +146,14 @@ public class ProductServiceImpl implements ProductService {
                 imge.setId(img.getId());
                imge.setPicByte(img.getPicByte());
                imge.setType(img.getType());
-            System.out.println("p.getPr_images().get(i).getId() :"+p.getPr_images().get(i).getId());
-            System.out.println("image name:"+name);
-            System.out.println("image img.getId():"+img.getId());
-            System.out.println("image :"+imge.getName());
+            //System.out.println("p.getPr_images().get(i).getId() :"+p.getPr_images().get(i).getId());
+//            System.out.println("image :"+imge.getName());
             product.setPr_image(imge);
         }
         for(int i=0;i<p.getComplaint().size();i++) {
             Complaint  complaint= new Complaint();
             String name = p.getComplaint().get(i).getName();
-            System.out.println("getComplaint :"+name);
+         //   System.out.println("getComplaint :"+name);
             complaint.setEmail(p.getComplaint().get(i).getEmail());
             complaint.setId(p.getComplaint().get(i).getId());
             complaint.setMessage(p.getComplaint().get(i).getMessage());
@@ -166,13 +177,13 @@ public class ProductServiceImpl implements ProductService {
         s.setName(p.getSpeciality().getName());
         s.setId(p.getSpeciality().getId());
         product.setSpeciality(s);
-        System.out.println("speciality :"+product.getSpeciality());
+     //   System.out.println("speciality :"+product.getSpeciality());
         product.setId(p.getId());
         product.setName(p.getName());
         product.setDescription(p.getDescription());
         product.setReference(p.getReference());
         product.setMarque(p.getMarque());
-        System.out.println("nbr vue"+product.getNombreVue());
+       // System.out.println("nbr vue"+product.getNombreVue());
         for(int i=0;i<p.getPr_images().size();i++) {
             ImageModel  img= new ImageModel();
             long name = p.getPr_images().get(i).getId();
@@ -181,10 +192,7 @@ public class ProductServiceImpl implements ProductService {
             imge.setName(img.getName());
             imge.setId(img.getId());
             imge.setPicByte(img.getPicByte());
-            System.out.println("p.getPr_images().get(i).getId() :"+p.getPr_images().get(i).getId());
-            System.out.println("image name:"+name);
-            System.out.println("image img.getId():"+img.getId());
-            System.out.println("image :"+imge.getName());
+           // System.out.println("image :"+imge.getName());
             product.setPr_image(imge);
         }
 
@@ -198,7 +206,7 @@ public class ProductServiceImpl implements ProductService {
         List<cardproduct> products= new ArrayList<>();        //   System.out.println("tendancnew");
         if(p.size()<4){
             for(int i=0;i<p.size();i++){
-                System.out.println(" tendancnew produit"+p.get(i).getName());
+               // System.out.println(" tendancnew produit"+p.get(i).getName());
                 cardproduct  cardproduct=new cardproduct(p.get(i));
                 ImageModel  img= new ImageModel();
                 if(p.get(i).getPr_images().isEmpty()) {}
@@ -209,15 +217,15 @@ public class ProductServiceImpl implements ProductService {
                         cardproduct.setPicByte(img.getPicByte());
                     }}
                 products.add(cardproduct);
-                System.out.println(" tendancnew 1"+p.get(i).getName());
             }
         }else{
             for(int i=0;i<4;i++){
                 ImageModel  img= new ImageModel();
-                cardproduct  cardproduct=new cardproduct(p.get(p.size()-i));
-                if(p.get(p.size()-i).getPr_images().isEmpty()) {}
+                int k=p.size()-i-1;
+                cardproduct  cardproduct=new cardproduct(p.get(k));
+                if(p.get(k).getPr_images().isEmpty()) {}
                 else{
-                    if(p.get(p.size()-i).getPr_images().get(0)!=null){
+                    if(p.get(k).getPr_images().get(0)!=null){
                         long name = p.get(i).getPr_images().get(0).getId();
                         img= imageService.findById(name);
                         cardproduct.setPicByte(img.getPicByte());
@@ -242,7 +250,7 @@ public class ProductServiceImpl implements ProductService {
         s.setName(p.getSpeciality().getName());
         s.setId(p.getSpeciality().getId());
         product.setSpeciality(s);
-        System.out.println("speciality :"+product.getSpeciality());
+     //   System.out.println("speciality :"+product.getSpeciality());
         product.setId(p.getId());
         product.setName(p.getName());
         product.setDescription(p.getDescription());
@@ -258,7 +266,7 @@ public class ProductServiceImpl implements ProductService {
             imge.setId(img.getId());
             imge.setPicByte(img.getPicByte());
             imge.setType(img.getType());
-            System.out.println("image img.getId():"+imge.getId());
+           // System.out.println("image img.getId():"+imge.getId());
             System.out.println("image :"+imge.getName());
             product.setPr_image(imge);
         }
@@ -268,7 +276,7 @@ public class ProductServiceImpl implements ProductService {
 
     //products by speciality name
     @Override
-    public Page<Product> getproducts_sp(String name, Pageable pageable) {
+    public Page<Product> getproducts_sp(String name,Pageable pageable) {
         return productRepository.findAllByBlockedIsFalseAndSpecialityName(name,pageable);
     }
 
@@ -292,7 +300,7 @@ public Product getproductAd(long productId) {
     s.setName(p.getSpeciality().getName());
     s.setId(p.getSpeciality().getId());
     product.setSpeciality(s);
-    System.out.println("speciality :"+product.getSpeciality());
+    //System.out.println("speciality :"+product.getSpeciality());
     product.setId(p.getId());
     product.setName(p.getName());
     product.setDescription(p.getDescription());
@@ -306,8 +314,8 @@ public Product getproductAd(long productId) {
     provider.setFirstname(p.getProvider().getFirstname());
     provider.setEmail(p.getProvider().getEmail());
     product.setProvider(provider);
-    System.out.println("nbr vue"+product.getNombreVue());
-    System.out.println("nbr vue"+product.getProvider().getLastname());
+    //System.out.println("nbr vue"+product.getNombreVue());
+    //System.out.println("nbr vue"+product.getProvider().getLastname());
     product.setNombrewish(p.getNombrewish());
     for(int i=0;i<p.getPr_images().size();i++) {
         ImageModel  img= new ImageModel();
@@ -318,13 +326,13 @@ public Product getproductAd(long productId) {
         imge.setId(img.getId());
         imge.setPicByte(img.getPicByte());
         imge.setType(img.getType());
-        System.out.println("image :"+imge.getName());
+       // System.out.println("image :"+imge.getName());
         product.setPr_image(imge);
     }
     for(int i=0;i<p.getComplaint().size();i++) {
         Complaint  complaint= new Complaint();
         String name = p.getComplaint().get(i).getName();
-        System.out.println("getComplaint :"+name);
+       // System.out.println("getComplaint :"+name);
         complaint.setEmail(p.getComplaint().get(i).getEmail());
         complaint.setId(p.getComplaint().get(i).getId());
         complaint.setMessage(p.getComplaint().get(i).getMessage());
@@ -336,44 +344,42 @@ public Product getproductAd(long productId) {
     return product;
 }
     @Override
-    public List<Product> findAll() {
-        List<Product> list=productRepository.findAll();
+    public List<Product> findAll(Pageable pageable) {
+        Page<Product> list=productRepository.findAll(pageable);
         List<Product> l=new ArrayList<>();
-        if(list!=null){
-            for(int i=0;i<list.size();i++) {
-                //  System.out.println("****"+user.getSpecialities().get(i).toString());
-                // Speciality s=specialityRepository.getOne(user.getSpecialities().get(i).getId());
+        Iterator<Product> it =list.iterator();
+        while (it.hasNext())
+        {
+            Product Product=it.next();
                 Product product=new Product();
                 Speciality s= new Speciality();
-                s.setName(list.get(i).getSpeciality().getName());
-                s.setId(list.get(i).getSpeciality().getId());
+                s.setName(Product.getSpeciality().getName());
+                s.setId(Product.getSpeciality().getId());
                 product.setSpeciality(s);
-                product.setId(list.get(i).getId());
-                product.setBlocked(list.get(i).isBlocked());
-                product.setName(list.get(i).getName());
-                //product.setDescription(list.get(i).getDescription());
-                product.setReference(list.get(i).getReference());
-                // product.setCatalogue(list.get(i).getCatalogue());
-                product.setMarque(list.get(i).getMarque());
+                product.setId(Product.getId());
+                product.setMarque(Product.getMarque());
+                product.setName(Product.getName());
+                product.setReference(Product.getReference());
+                product.setMarque(Product.getMarque());
                 ImageModel  img= new ImageModel();
-                if(list.get(i).getPr_images().isEmpty()) {}
+                if(Product.getPr_images().isEmpty()) {}
                 else{
-                if(list.get(i).getPr_images().get(0)!=null){
-                    long name = list.get(i).getPr_images().get(0).getId();
-                    img= imageService.findById(name);
-                    ImageModel  imge= new ImageModel();
-                    imge.setName(img.getName());
-                    imge.setId(img.getId());
-                    imge.setPicByte(img.getPicByte());
-                    imge.setType(img.getType());
-                    System.out.println("allproductprov"+imge.getName());
-                    product.setPr_image(imge);
-                }
+                    if (Product.getPr_images().get(0)!=null) {
+                        long name =Product.getPr_images().get(0).getId();
+                        img = imageService.findById(name);
+                        ImageModel imge = new ImageModel();
+                        imge.setName(img.getName());
+                        imge.setId(img.getId());
+                        imge.setPicByte(img.getPicByte());
+                        imge.setType(img.getType());
+
+                        product.setPr_image(imge);
+                    }
                 }
 
                 l.add(product);
             }
-        }
+
         return l ;
 
     }
@@ -398,7 +404,7 @@ public Product getproductAd(long productId) {
         Product productInfo = findOne(productId);
         if (productInfo == null) throw new MyException(ResultEnum.PRODUCT_NOT_EXIST);
         productInfo.setBlocked(false);
-        System.out.println("onSale false "+productId);
+       // System.out.println("onSale false "+productId);
          productRepository.save(productInfo);
     }
     ///delete on db
@@ -418,6 +424,7 @@ public Product getproductAd(long productId) {
     //for  provider list
     @Override
     public List<Product> findAllProductprovider(long idprovider) {
+
         List<Product> list= productRepository.findAllByBlockedIsFalseAndProvider_Id(idprovider);
         List<Product> l=new ArrayList<>();
         if(list!=null){
@@ -446,7 +453,7 @@ public Product getproductAd(long productId) {
                    imge.setId(img.getId());
                    imge.setPicByte(img.getPicByte());
                    imge.setType(img.getType());
-                   System.out.println("allproductprov" + imge.getName());
+                  // System.out.println("allproductprov" + imge.getName());
                /*img.setName(name);
                img.setId(list.get(i).getPr_images().get(1).getId());
                img.setPicByte(list.get(i).getPr_images().get(1).getPicByte());
@@ -464,16 +471,13 @@ public Product getproductAd(long productId) {
     }
 
     //edit update product
-
-
-    //edit update product
     @Override
     public long update(Product productInfo) {
 
         // if null throw exception
         // categoryService.findByCategoryType(productInfo.getCategoryType());
         if(productInfo.isBlocked()) {
-            System.out.println("blocked");
+          //  System.out.println("blocked");
             throw new MyException(ResultEnum.PRODUCT_STATUS_ERROR);
         }
         if(productInfo.getId()!=0){
@@ -486,7 +490,7 @@ public Product getproductAd(long productId) {
                     productInfo.getSpeciality().getId()<product.getSpeciality().getId()){
                 System.out.println("--"+productInfo.getName());
                 Speciality sp=specialityRepository.findByIdAndStatusTrue(productInfo.getSpeciality().getId());
-                System.out.println("speciality"+sp.getName());
+              //  System.out.println("speciality"+sp.getName());
                 product.setSpeciality(sp);
 
             }
@@ -495,7 +499,7 @@ public Product getproductAd(long productId) {
         }else{
         System.out.println("--"+productInfo.getName());
         Speciality sp=specialityRepository.findByIdAndStatusTrue(productInfo.getSpeciality().getId());
-        System.out.println("speciality"+sp.getName());
+     //   System.out.println("speciality"+sp.getName());
         productInfo.setSpeciality(sp);
         Product p=productRepository.save(productInfo);
         return p.getId();}
@@ -508,12 +512,12 @@ public Product getproductAd(long productId) {
 
     @Override
     public List<cardproduct> Diagnostinew() {
-        List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_NameAndNombreVueLessThan("Diagnostic ",20);
+        List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_NameAndNombreVueLessThan("Diagnostic ",200);
         List<cardproduct> products=new ArrayList<>();
         //   System.out.println("tendancnew");
         if(p.size()<6){
             for(int i=0;i<p.size();i++){
-                System.out.println(" tendancnew produit"+p.get(i).getName());
+             //   System.out.println(" Diagnostinew produit"+p.get(i).getName());
                 cardproduct  cardproduct=new cardproduct(p.get(i));
                 ImageModel  img= new ImageModel();
                 if(p.get(i).getPr_images().isEmpty()) {}
@@ -524,15 +528,16 @@ public Product getproductAd(long productId) {
                         cardproduct.setPicByte(img.getPicByte());
                     }}
                 products.add(cardproduct);
-                System.out.println(" Diagnostinew 1"+p.get(i).getName());
+              //  System.out.println(" Diagnostinew 1"+p.get(i).getName());
             }
         }else{
             for(int i=0;i<6;i++){
                 ImageModel  img= new ImageModel();
-                cardproduct  cardproduct=new cardproduct(p.get(p.size()-i));
-                if(p.get(p.size()-i).getPr_images().isEmpty()) {}
+                int k=p.size()-i;
+                cardproduct  cardproduct=new cardproduct(p.get(k));
+                if(p.get(k).getPr_images().isEmpty()) {}
                 else{
-                    if(p.get(p.size()-i).getPr_images().get(0)!=null){
+                    if(p.get(k).getPr_images().get(0)!=null){
                         long name = p.get(i).getPr_images().get(0).getId();
                         img= imageService.findById(name);
                         cardproduct.setPicByte(img.getPicByte());
@@ -546,12 +551,14 @@ public Product getproductAd(long productId) {
 
     @Override
     public List<cardproduct> Diagnostiautre() {
-        List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_Name("Diagnostic");
+        //List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_Name("Diagnostic");
+        List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_NameAndNombreVueLessThan("Diagnostic ",50);
+        System.out.println(" *************************Diagnostiautre produit"+p.size());
         List<cardproduct> products=new ArrayList<>();
         //   System.out.println("tendancnew");
         if(p.size()<6){
             for(int i=0;i<p.size();i++){
-                System.out.println(" tendancnew produit"+p.get(i).getName());
+
                 cardproduct  cardproduct=new cardproduct(p.get(i));
                 ImageModel  img= new ImageModel();
                 if(p.get(i).getPr_images().isEmpty()) {}
@@ -562,15 +569,16 @@ public Product getproductAd(long productId) {
                         cardproduct.setPicByte(img.getPicByte());
                     }}
                 products.add(cardproduct);
-                System.out.println(" tendancnew 1"+p.get(i).getName());
+                System.out.println(" *************************Diagnostiautre produit"+products.size());
             }
         }else{
             for(int i=0;i<6;i++){
                 ImageModel  img= new ImageModel();
-                cardproduct  cardproduct=new cardproduct(p.get(p.size()-i));
-                if(p.get(p.size()-i).getPr_images().isEmpty()) {}
+                int k=p.size()-i-1;
+                cardproduct  cardproduct=new cardproduct(p.get(k));
+                if(p.get(k).getPr_images().isEmpty()) {}
                 else{
-                    if(p.get(p.size()-i).getPr_images().get(0)!=null){
+                    if(p.get(k).getPr_images().get(0)!=null){
                         long name = p.get(i).getPr_images().get(0).getId();
                         img= imageService.findById(name);
                         cardproduct.setPicByte(img.getPicByte());
@@ -584,12 +592,13 @@ public Product getproductAd(long productId) {
 
     @Override
     public List<cardproduct> Diagnostivendu() {
-        List<Product>  p=productRepository.findAllByBlockedIsFalseAndSpeciality_NameAndNombreVueGreaterThan("Diagnostic",5);
+        List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_NameAndNombreVueGreaterThan("Diagnostic ",50);
         List<cardproduct> products=new ArrayList<>();
+        System.out.println(" *************************Diagnostivendu produit"+p.size());
         //   System.out.println("tendancnew");
         if(p.size()<6){
             for(int i=0;i<p.size();i++){
-                System.out.println(" tendancnew produit"+p.get(i).getName());
+                System.out.println(" wwwwwDiagnostivendu produit"+p.get(i).getName());
                 cardproduct  cardproduct=new cardproduct(p.get(i));
                 ImageModel  img= new ImageModel();
                 if(p.get(i).getPr_images().isEmpty()) {}
@@ -600,21 +609,23 @@ public Product getproductAd(long productId) {
                         cardproduct.setPicByte(img.getPicByte());
                     }}
                 products.add(cardproduct);
-                System.out.println(" tendancnew 1"+p.get(i).getName());
+                System.out.println(" wwwwwDiagnostivendu 1"+p.get(i).getName());
             }
         }else{
             for(int i=0;i<6;i++){
                 ImageModel  img= new ImageModel();
-                cardproduct  cardproduct=new cardproduct(p.get(p.size()-i));
-                if(p.get(p.size()-i).getPr_images().isEmpty()) {}
+                int k=p.size()-i-1;
+
+                cardproduct  cardproduct=new cardproduct(p.get(k));
+                if(p.get(k).getPr_images().isEmpty()) {}
                 else{
-                    if(p.get(p.size()-i).getPr_images().get(0)!=null){
+                    if(p.get(k).getPr_images().get(0)!=null){
                         long name = p.get(i).getPr_images().get(0).getId();
                         img= imageService.findById(name);
                         cardproduct.setPicByte(img.getPicByte());
                     }}
                 products.add(cardproduct);
-                //     System.out.println(" tendancnew produit"+p.get(p.size()-i).getName());
+                 System.out.println(" *************************Diagnostivendu produit"+p.get(k).getName());
 
             }}
         return products;
@@ -622,12 +633,12 @@ public Product getproductAd(long productId) {
 
     @Override
     public List<cardproduct> logicienew() {
-        List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_NameNotAndNombreVueLessThan("Diagnostic",10);
+        List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_NameNotAndNombreVueLessThan("Diagnostic",40);
         List<cardproduct> products=new ArrayList<>();
         //   System.out.println("tendancnew");
         if(p.size()<6){
             for(int i=0;i<p.size();i++){
-                System.out.println(" logicienew"+p.get(i).getName());
+             //   System.out.println(" logicienew"+p.get(i).getName());
                 cardproduct  cardproduct=new cardproduct(p.get(i));
                 ImageModel  img= new ImageModel();
                 if(p.get(i).getPr_images().isEmpty()) {}
@@ -638,16 +649,18 @@ public Product getproductAd(long productId) {
                         cardproduct.setPicByte(img.getPicByte());
                     }}
                 products.add(cardproduct);
-                System.out.println("logicienew"+p.get(i).getName());
+              //  System.out.println("logicienew"+p.get(i).getName());
             }
         }else{
             for(int i=0;i<6;i++){
                 ImageModel  img= new ImageModel();
-                cardproduct  cardproduct=new cardproduct(p.get(p.size()-i));
-                if(p.get(p.size()-i).getPr_images().isEmpty()) {}
+                int k=p.size()-i-1;
+
+                cardproduct  cardproduct=new cardproduct(p.get(k));
+                if(p.get(k).getPr_images().isEmpty()) {}
                 else{
-                    if(p.get(p.size()-i).getPr_images().get(0)!=null){
-                        long name = p.get(i).getPr_images().get(0).getId();
+                    if(p.get(k).getPr_images().get(0)!=null){
+                        long name = p.get(k).getPr_images().get(0).getId();
                         img= imageService.findById(name);
                         cardproduct.setPicByte(img.getPicByte());
                     }}
@@ -659,8 +672,9 @@ public Product getproductAd(long productId) {
 
     @Override
     public List<cardproduct> logicievendu() {
-        List<Product>  p= productRepository.findAllByBlockedIsFalseAndNombreVueNotNullAndSpeciality_NameNot("Diagnostic");
+        List<Product>  p= productRepository.findAllByBlockedIsFalseAndNombreVueNotNullAndSpeciality_NameNotAndNombreVueGreaterThan("Diagnostic",40);
         List<cardproduct> products=new ArrayList<>();
+        System.out.println(" *************************logicievendu produit"+p.size());
         //   System.out.println("tendancnew");
         if(p.size()<6){
             for(int i=0;i<p.size();i++){
@@ -680,11 +694,12 @@ public Product getproductAd(long productId) {
         }else{
             for(int i=0;i<6;i++){
                 ImageModel  img= new ImageModel();
-                cardproduct  cardproduct=new cardproduct(p.get(p.size()-i));
-                if(p.get(p.size()-i).getPr_images().isEmpty()) {}
+                int k=p.size()-i-1;
+                cardproduct  cardproduct=new cardproduct(p.get(k));
+                if(p.get(k).getPr_images().isEmpty()) {}
                 else{
-                    if(p.get(p.size()-i).getPr_images().get(0)!=null){
-                        long name = p.get(i).getPr_images().get(0).getId();
+                    if(p.get(k).getPr_images().get(0)!=null){
+                        long name = p.get(k).getPr_images().get(0).getId();
                         img= imageService.findById(name);
                         cardproduct.setPicByte(img.getPicByte());
                     }}
@@ -696,12 +711,12 @@ public Product getproductAd(long productId) {
 
     @Override
     public List<cardproduct> logicieautre() {
-        List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_NameNot("Diagnostic");
+        List<Product>  p= productRepository.findAllByBlockedIsFalseAndSpeciality_NameNotAndNombreVueLessThan("Mobilier medical",20);
         List<cardproduct> products=new ArrayList<>();
         //   System.out.println("tendancnew");
         if(p.size()<6){
             for(int i=0;i<p.size();i++){
-                System.out.println(" logicieautre produit"+p.get(i).getName());
+              //  System.out.println(" logicieautre produit"+p.get(i).getName());
                 cardproduct  cardproduct=new cardproduct(p.get(i));
                 ImageModel  img= new ImageModel();
                 if(p.get(i).getPr_images().isEmpty()) {}
@@ -712,16 +727,17 @@ public Product getproductAd(long productId) {
                         cardproduct.setPicByte(img.getPicByte());
                     }}
                 products.add(cardproduct);
-                System.out.println(" logicieautre 1"+p.get(i).getName());
+                //System.out.println(" logicieautre 1"+p.get(i).getName());
             }
         }else{
             for(int i=0;i<6;i++){
                 ImageModel  img= new ImageModel();
-                cardproduct  cardproduct=new cardproduct(p.get(p.size()-i));
-                if(p.get(p.size()-i).getPr_images().isEmpty()) {}
+                int k=p.size()-i-1;
+                cardproduct  cardproduct=new cardproduct(p.get(k));
+                if(p.get(k).getPr_images().isEmpty()) {}
                 else{
-                    if(p.get(p.size()-i).getPr_images().get(0)!=null){
-                        long name = p.get(i).getPr_images().get(0).getId();
+                    if(p.get(k).getPr_images().get(0)!=null){
+                        long name = p.get(k).getPr_images().get(0).getId();
                         img= imageService.findById(name);
                         cardproduct.setPicByte(img.getPicByte());
                     }}
@@ -738,7 +754,7 @@ public Product getproductAd(long productId) {
      //   System.out.println("tendancnew");
         if(p.size()<6){
             for(int i=0;i<p.size();i++){
-                System.out.println(" tendancnew produit"+p.get(i).getName());
+             //   System.out.println(" tendancnew produit"+p.get(i).getName());
                 cardproduct  cardproduct=new cardproduct(p.get(i));
                 ImageModel  img= new ImageModel();
                 if(p.get(i).getPr_images().isEmpty()) {}
@@ -749,16 +765,17 @@ public Product getproductAd(long productId) {
                         cardproduct.setPicByte(img.getPicByte());
                     }}
                 products.add(cardproduct);
-                System.out.println(" tendancnew 1"+p.get(i).getName());
+               // System.out.println(" tendancnew 1"+p.get(i).getName());
             }
         }else{
             for(int i=0;i<6;i++){
                 ImageModel  img= new ImageModel();
-                cardproduct  cardproduct=new cardproduct(p.get(p.size()-i));
-                if(p.get(p.size()-i).getPr_images().isEmpty()) {}
+                int k=p.size()-i-1;
+                cardproduct  cardproduct=new cardproduct(p.get(k));
+                if(p.get(k).getPr_images().isEmpty()) {}
                 else{
-                    if(p.get(p.size()-i).getPr_images().get(0)!=null){
-                        long name = p.get(i).getPr_images().get(0).getId();
+                    if(p.get(k).getPr_images().get(0)!=null){
+                        long name = p.get(k).getPr_images().get(0).getId();
                         img= imageService.findById(name);
                         cardproduct.setPicByte(img.getPicByte());
                     }}

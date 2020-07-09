@@ -16,4 +16,5 @@ public interface DoctorRepository extends JpaRepository<Doctor,Long> {
    // Page<Doctor> findAllByIdOrderById(Pageable pageable);
 
     Doctor findByEmail(String mail);
+    Page<Doctor> findAll(Pageable pageable);
 }

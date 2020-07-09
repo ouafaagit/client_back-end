@@ -33,7 +33,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<OrderMain> findAll( long id,Pageable pageable) {
-        return orderRepository.findAllByProductsProviderId(id,pageable);
+        return orderRepository.findDistinctByProductsProviderId(id,pageable);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderMain findOne(Long orderId) {
+    public OrderMain findOne(long orderId) {
         OrderMain orderMain = orderRepository.findByOrderId(orderId);
         if(orderMain == null) {
             throw new MyException(ResultEnum.ORDER_NOT_FOUND);
@@ -61,8 +61,9 @@ public class OrderServiceImpl implements OrderService {
     }
     @Override
     public List<ProductInOrder> findByprovider(long orderId,long idprovider) {
-        List<ProductInOrder> orderMain = productInOrderRepository.findAllByProductIdEqualsAndAndProductId(orderId,idprovider);
+        List<ProductInOrder> orderMain = productInOrderRepository.findAllByOrderMain_OrderIdAndProviderId(orderId,idprovider);
         if(orderMain == null) {
+            //findAllByProductIdEqualsAndAndProductId
             throw new MyException(ResultEnum.ORDER_NOT_FOUND);
         }
         return orderMain;
@@ -70,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderMain finish(Long orderId) {
+    public OrderMain finish(long orderId) {
         OrderMain orderMain = findOne(orderId);
         if(!orderMain.getOrderStatus().equals(OrderStatusEnum.NEW.getCode())) {
             throw new MyException(ResultEnum.ORDER_STATUS_ERROR);
@@ -83,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderMain cancel(Long orderId) {
+    public OrderMain cancel(long orderId) {
         OrderMain orderMain = findOne(orderId);
         if(!orderMain.getOrderStatus().equals(OrderStatusEnum.NEW.getCode())) {
             throw new MyException(ResultEnum.ORDER_STATUS_ERROR);

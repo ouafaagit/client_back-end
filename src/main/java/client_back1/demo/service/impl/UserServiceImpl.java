@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -163,15 +161,13 @@ public class UserServiceImpl implements UserService {
       //  List<Speciality> sp= new ObjectMapper().readValue(userr,Provider.class);
         Provider provider=user;
         provider.setPassword(passwordEncoder.encode(user.getPassword()));
-        provider.setSpecialities(new ArrayList<Speciality>());
+        provider.setSpecialities(new HashSet<>());
         System.out.println("****"+user.getSpecialities().size());
-        for(int i=0;i<user.getSpecialities().size();i++) {
-            System.out.println("****"+user.getSpecialities().get(i).toString());
-            Speciality s=specialityRepository.getOne(user.getSpecialities().get(i).getId());
-            provider.getSpecialities().add(s);
-            System.out.println("aaaaa"+provider.getSpecialities().get(i).toString());
-
-            s.getProviders().add(provider);
+            Iterator<Speciality> it =user.getSpecialities().iterator();
+            while (it.hasNext())
+            {
+            provider.getSpecialities().add(it.next());
+          //  s.getProviders().add(provider);
         }
         return providerRepository.save(provider);
     }
@@ -185,7 +181,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             Provider provider=user;
-        provider.setSpecialities(new ArrayList<Speciality>());
+        provider.setSpecialities(new HashSet<>());
             //Provider provider=new Provider();
            // provider.setId(user.getId());
        /*     provider.setFirstname(user.getFirstname());
@@ -201,14 +197,11 @@ public class UserServiceImpl implements UserService {
             return s;
             }).collect(Collectors.toList()));*/
             //Provider savedUser =providerRepository.save(provider);
-            System.out.println("****"+user.getSpecialities().size());
-            for(int i=0;i<user.getSpecialities().size();i++) {
-                System.out.println("****"+user.getSpecialities().get(i).toString());
-                Speciality s=specialityRepository.getOne(user.getSpecialities().get(i).getId());
-                provider.getSpecialities().add(s);
-                System.out.println("aaaaa"+provider.getSpecialities().get(i).toString());
+                Iterator<Speciality> it =user.getSpecialities().iterator();
+                while (it.hasNext())
+                {
+                provider.getSpecialities().add(it.next());
 
-                s.getProviders().add(provider);
             }
            // Provider savedUser =providerRepository.save(provider);
 

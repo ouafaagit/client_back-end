@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProductInOrderRepository extends JpaRepository<ProductInOrder, Long> {
-   List<ProductInOrder> findAllByProductIdEqualsAndAndProductId(long orderId, long idprovider);
+   List<ProductInOrder> findAllByOrderMain_OrderIdAndProviderId(long orderId, long idprovider);
 }

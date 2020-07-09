@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static client_back1.demo.service.ImageService.compressBytes;
 
@@ -55,7 +52,7 @@ while (it.hasNext())
     productInOrder.setProductIcon(img);
     cart1.getProducts().add(productInOrder);
 }
-        System.out.println("getCart1  :"+cart1.toString());
+        System.out.println("getCart1 :"+cart1.toString());
    //     Cart cart1=new Cart(user);
       //  cart1.setCartId(cart.getCartId());
       //  cart1.setProducts(cart.getCartId());
@@ -66,12 +63,21 @@ while (it.hasNext())
     @Transactional
     public void mergeLocalCart(Collection<ProductInOrder> productInOrders, Doctor user) {
         Cart finalCart = user.getCart();
+
         System.out.println(" ************user"+ user.getEmail());
         //System.out.println(" ************user"+ user.getEmail()+" carte :"+user.getCart().getCartId()+" carte user:"+user.getCart().getUser().getId());
         System.out.println(" ************finalCart"+ finalCart.getCartId()+" user"+finalCart.getUser().getId());
         productInOrders.forEach(productInOrder -> {
             System.out.println("productInOrder"+ productInOrder.getProductName());
-
+            Set<Product> wishlist=user.getWishlist();
+            Optional<Product> pro = wishlist.stream().filter(e -> productInOrder.getProductId().equals(" "+e.getId())).findFirst();
+            if (pro.isPresent())
+         { System.out.println(" ***wishlist.contains(product) :"+pro.get());
+             user.getWishlist().remove(pro.get());
+             userRepository.save(user);
+             pro.get().getWishdoc().remove(user);
+             productService.save(pro.get());
+         }
                 Set<ProductInOrder> set = finalCart.getProducts();
                 Optional<ProductInOrder> old = set.stream().filter(e -> productInOrder.getProductId().equals(e.getProductId())).findFirst();
                 ProductInOrder prod;

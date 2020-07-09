@@ -1,14 +1,19 @@
 package client_back1.demo.service.impl;
 import client_back1.demo.entity.*;
 import client_back1.demo.repository.DoctorRepository;
+import client_back1.demo.repository.ProductRepository;
 import client_back1.demo.service.DoctorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @Service
@@ -16,6 +21,8 @@ import java.util.List;
 public class DoctorServiceImpl implements DoctorService {
     private final PasswordEncoder passwordEncoder;
     private final DoctorRepository doctorRepository;
+    @Autowired
+    ProductRepository productRepository;
 
 
     public DoctorServiceImpl(PasswordEncoder passwordEncoder, DoctorRepository doctorRepository) {
@@ -51,6 +58,48 @@ public class DoctorServiceImpl implements DoctorService {
 
         return doctorRepository.save(doctorInfo);
         }
+
+        ////merge wislist////
+        @Override
+        @Transactional
+        public List<ProductInOrder> mergeLocalwish(Collection<ProductInOrder> productInOrders, String userr) {
+            Doctor user = doctorRepository.findByEmail(userr);
+            System.out.println(" ************user"+ user.getEmail());
+            Iterator<ProductInOrder> it =productInOrders.iterator();
+            while (it.hasNext())
+            {
+                Product product=productRepository.findByIdAndBlockedIsFalse(it.next().getId());
+                user.getWishlist().add(product);
+              //  user.getWishlist().
+            }
+          user=  doctorRepository.save(user);
+            Iterator<Product> itt =user.getWishlist().iterator();
+            List<ProductInOrder>productInOrd=new ArrayList<>();
+            while (itt.hasNext())
+            {
+                ProductInOrder productInOrder=new ProductInOrder(itt.next(),1);
+                productInOrd.add(productInOrder);
+                //  user.getWishlist().
+            }
+return productInOrd;
+        }
+
+    @Override
+    //@Transactional
+    public void deleteitem(String itemId, Doctor user) {
+        var op = user.getWishlist().stream().filter(e -> itemId.equals(" "+e.getId())).findFirst();
+        op.ifPresent(product -> {
+            System.out.println("&&&&&&&delete item");
+            //product.getWishdoc().remove(user);
+            System.out.println("uuuOP"+op.get().getName());
+            user.getWishlist().remove(op.get());
+            doctorRepository.save(user);
+            op.get().getWishdoc().remove(user);
+            //   productInOrderRepository.deleteById(productInOrder.getId());
+
+            productRepository.save(op.get());
+        });
+    }
 
     //new Quotation
  /*   @Override
@@ -97,22 +146,25 @@ public class DoctorServiceImpl implements DoctorService {
             return this.doctorRepository.findByLastname(name);
         }
         @Override
-        public List<Doctor> findAll() {
-            List<Doctor>  l= doctorRepository.findAll();
+        public Page<Doctor> findAll(Pageable pageable) {
+            Page<Doctor>  l= doctorRepository.findAll(pageable);
             List<Doctor>  ll=new ArrayList<Doctor>();
-            for ( int j=0;j<l.size();j++)
-            {   Doctor ss=new Doctor();
-                ss.setEmail(l.get(j).getEmail());
-                ss.setPhone(l.get(j).getPhone());
+            Iterator<Doctor> it =l.iterator();
+            while (it.hasNext())
+            {
+                Doctor doctor=it.next();
+                                Doctor ss=new Doctor();
+                ss.setEmail(doctor.getEmail());
+                ss.setPhone(doctor.getPhone());
               Speciality  s=new Speciality();
-              s.setName(l.get(j).getSpeciality().getName());
+              s.setName(doctor.getSpeciality().getName());
                 ss.setSpeciality(s);
-                ss.setFirstname(l.get(j).getFirstname());
-                ss.setLastname(l.get(j).getLastname());
+                ss.setFirstname(doctor.getFirstname());
+                ss.setLastname(doctor.getLastname());
                 ll.add(ss);
 System.out.println("all doc"+ss.getFirstname());
             }
-            return ll;
+            return new PageImpl<>(ll, pageable, ll.size());
         }
 
       /*  //delete status -1 in db

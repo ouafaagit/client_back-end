@@ -1,7 +1,0 @@
-package client_back1.demo.repository;
-
-import client_back1.demo.entity.Date_Quotation;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface Date_QuotationRepository extends JpaRepository<Date_Quotation, Long> {
-}

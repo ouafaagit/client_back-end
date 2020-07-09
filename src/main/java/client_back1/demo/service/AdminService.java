@@ -5,6 +5,8 @@ import client_back1.demo.entity.Provider;
 
 import client_back1.demo.entity.Speciality;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
@@ -14,9 +16,9 @@ import java.util.List;
 @Service
 public interface AdminService {
 
-    List<Provider> findAllnotblocked();
+    Page<Provider> findAllnotblocked(Pageable pageable);
 
-    List<Provider> findAllblocked();
+    Page<Provider> findAllblocked(Pageable pageable);
 
     Provider getProviderAd(long id);
 
@@ -24,16 +26,16 @@ public interface AdminService {
     List<Speciality> speprovidAd(long id);
 
     //for  provider list
-    List<Product> ProductprovidAd(long idprovider);
+    Page<Product> ProductprovidAd(long idprovider,Pageable pageable);
 
     ////////////////admin/////////////////////
     // All providers for admin
-    List<Provider> findAll();
+    Page<Provider> findAll(Pageable pageable);
     //Product addProduct(long id, Product product);
     //add
     Provider save(Provider productInfo);
     void delete(long Id);
-    List<Provider> newproviders();
+    Page<Provider> newproviders(Pageable pageable);
 
     //bolck provider
     void offprovider(long Id);

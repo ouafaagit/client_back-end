@@ -6,7 +6,10 @@ import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 //@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @DiscriminatorValue("P")
@@ -67,7 +70,7 @@ public class Provider extends User{
 
     //@JsonProperty("Specialities")
    // @JsonBackReference
-    List<Speciality> Specialities=new ArrayList<Speciality>();
+    Set<Speciality> Specialities=new HashSet<Speciality>();
 //    AbstractAdmin abstractAdmin;
 @Column(table ="Society" )
 //@Column
@@ -171,15 +174,12 @@ private String name;
         return product;
     }
 
-    public List<Speciality> getSpecialities() {
+    public Set<Speciality> getSpecialities() {
         return Specialities;
     }
 
-    public void setSpecialities(List<Speciality> specialities) {
+    public void setSpecialities(Set<Speciality> specialities) {
         Specialities = specialities;
-    }
-    public void setSpecialitie(Speciality specialities) {
-        Specialities.add(specialities) ;
     }
 
     public void setStatus(int status) {

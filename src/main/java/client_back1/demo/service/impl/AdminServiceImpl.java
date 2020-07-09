@@ -12,6 +12,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -102,7 +105,7 @@ return   provider;
 public List<Speciality> speprovidAd(long id){
     Provider pro=providerRepository.findByIdAndStatusNot(id,-1);
     List<Speciality>  ll=new ArrayList<Speciality>();
-    if(pro.getSpecialities()!=null) {
+ /*   if(pro.getSpecialities()!=null) {
         List<Speciality> l = pro.getSpecialities();
         for (int j = 0; j < l.size(); j++) {
             Speciality ss = new Speciality();
@@ -112,36 +115,47 @@ public List<Speciality> speprovidAd(long id){
             ll.add(ss);
             // System.out.println("$$$$$"+ll.get(j).getName());
         }
+    }*/
+    Iterator<Speciality> it =pro.getSpecialities().iterator();
+    while (it.hasNext())
+    {
+        Speciality s=it.next();
+        Speciality ss=new Speciality();
+        ss.setName(s.getName());
+        ss.setId(s.getId());
+        ss.setPriceSpeciality(s.getPriceSpeciality());
+        ll.add(ss);
+        // System.out.println("$$$$$"+ll.get(j).getName());
+
     }
     return ll;
 }
     //for  provider list
     @Override
-    public List<Product> ProductprovidAd(long idprovider) {
-        List<Product> list= productRepository.findAllByProvider_Id(idprovider);
+    public Page<Product> ProductprovidAd(long idprovider,Pageable pageable) {
+        Page<Product> list= productRepository.findAllByProvider_Id(idprovider,pageable);
         List<Product> l=new ArrayList<>();
-        if(list!=null){
-            for(int i=0;i<list.size();i++) {
-                //  System.out.println("****"+user.getSpecialities().get(i).toString());
-                // Speciality s=specialityRepository.getOne(user.getSpecialities().get(i).getId());
-                Product product=new Product();
+        Iterator<Product> it =list.iterator();
+        while (it.hasNext())
+        {            Product pr=it.next();
+            Product product=new Product();
                 Speciality s= new Speciality();
-                s.setName(list.get(i).getSpeciality().getName());
-                s.setId(list.get(i).getSpeciality().getId());
+                s.setName(pr.getSpeciality().getName());
+                s.setId(pr.getSpeciality().getId());
                 product.setSpeciality(s);
-                product.setId(list.get(i).getId());
-                product.setBlocked(list.get(i).isBlocked());
-                product.setName(list.get(i).getName());
+                product.setId(pr.getId());
+                product.setBlocked(pr.isBlocked());
+                product.setName(pr.getName());
                 //product.setDescription(list.get(i).getDescription());
-                product.setReference(list.get(i).getReference());
+                product.setReference(pr.getReference());
                 // product.setCatalogue(list.get(i).getCatalogue());
-                product.setNombreVue(list.get(i).getNombreVue());
-                product.setMarque(list.get(i).getMarque());
+                product.setNombreVue(pr.getNombreVue());
+                product.setMarque(pr.getMarque());
                 ImageModel  img= new ImageModel();
-                if(list.get(i).getPr_images().isEmpty()) {}
+                if(pr.getPr_images().isEmpty()) {}
                 else{
-                    if (list.get(i).getPr_images().get(0)!=null) {
-                        long name = list.get(i).getPr_images().get(0).getId();
+                    if (pr.getPr_images().get(0)!=null) {
+                        long name = pr.getPr_images().get(0).getId();
                         img = imageService.findById(name);
                         ImageModel imge = new ImageModel();
                         imge.setName(img.getName());
@@ -160,8 +174,8 @@ public List<Speciality> speprovidAd(long id){
 
                 l.add(product);
             }
-        }
-        return l ;
+
+        return new PageImpl<>(l, pageable, l.size()) ;
 
     }
 
@@ -172,98 +186,113 @@ public List<Speciality> speprovidAd(long id){
         return this.providerRepository.findByNameAndStatusNot(name,-1);
     }
     @Override
-    public List<Provider> findAll() {
-        List<Provider>  l=providerRepository.findAllByStatusNot(-1);
+    public Page<Provider> findAll(Pageable pageable) {
+        Page<Provider>  l=providerRepository.findAllByStatusNot(-1,pageable);
         List<Provider>  ll=new ArrayList<Provider>();
-        for ( int j=0;j<l.size();j++)
-        {   Provider ss=new Provider();
-            ss.setName(l.get(j).getName());
-            ss.setStatus(l.get(j).getStatus());
+        Iterator<Provider> it =l.iterator();
+        while (it.hasNext())
+        {
+            Provider provider=it.next();
+            Provider ss=new Provider();
+            ss.setName(provider.getName());
+            ss.setStatus(provider.getStatus());
             //System.out.println("provider :"+ss.getStatus()+ " "+l.get(j).getStatus());
-            ss.setEmail(l.get(j).getEmail());
-            ss.setEmailsociety(l.get(j).getEmailsociety());
-            ss.setPhone(l.get(j).getPhone());
-            ss.setId(l.get(j).getId());
-            ss.setFirstname(l.get(j).getFirstname());
-            ss.setLastname(l.get(j).getLastname());
+            ss.setEmail(provider.getEmail());
+            ss.setEmailsociety(provider.getEmailsociety());
+            ss.setPhone(provider.getPhone());
+            ss.setId(provider.getId());
+            ss.setFirstname(provider.getFirstname());
+            ss.setLastname(provider.getLastname());
 
           //  System.out.println("provider :"+ss.getLastname()+ " "+l.get(j).getLastname());
-            ss.setPricesubscription(l.get(j).getPricesubscription());
+            ss.setPricesubscription(provider.getPricesubscription());
             ll.add(ss);
             // System.out.println("$$$$$"+ll.get(j).getName());
 
         }
-        return ll;
+        return  new PageImpl<>(ll, pageable, ll.size());
     }
 
     @Override
-    public List<Provider> findAllnotblocked() {
-        List<Provider>  l=providerRepository.findAllByStatus(1);
+    public  Page<Provider> findAllnotblocked(Pageable pageable) {
+        Page<Provider>  l=providerRepository.findAllByStatus(1,pageable);
         List<Provider>  ll=new ArrayList<Provider>();
-        for ( int j=0;j<l.size();j++)
-        {   Provider ss=new Provider();
-            ss.setName(l.get(j).getName());
-            ss.setStatus(l.get(j).getStatus());
-            ss.setEmail(l.get(j).getEmail());
-            ss.setEmailsociety(l.get(j).getEmailsociety());
-            ss.setPhone(l.get(j).getPhone());
-            ss.setId(l.get(j).getId());
-            ss.setFirstname(l.get(j).getFirstname());
-            ss.setLastname(l.get(j).getLastname());
+        Iterator<Provider> it =l.iterator();
+        while (it.hasNext())
+        {
+            Provider provider=it.next();
+            Provider ss=new Provider();
+            ss.setName(provider.getName());
+            ss.setStatus(provider.getStatus());
+            //System.out.println("provider :"+ss.getStatus()+ " "+l.get(j).getStatus());
+            ss.setEmail(provider.getEmail());
+            ss.setEmailsociety(provider.getEmailsociety());
+            ss.setPhone(provider.getPhone());
+            ss.setId(provider.getId());
+            ss.setFirstname(provider.getFirstname());
+            ss.setLastname(provider.getLastname());
 
             //  System.out.println("provider :"+ss.getLastname()+ " "+l.get(j).getLastname());
-            ss.setPricesubscription(l.get(j).getPricesubscription());
+            ss.setPricesubscription(provider.getPricesubscription());
             ll.add(ss);
             // System.out.println("$$$$$"+ll.get(j).getName());
 
         }
-        return ll;
+        return  new PageImpl<>(ll, pageable, ll.size());
     }
     @Override
-    public List<Provider> findAllblocked() {
-        List<Provider>  l=providerRepository.findAllByStatus(0);
+    public Page<Provider> findAllblocked(Pageable pageable) {
+        Page<Provider>  l=providerRepository.findAllByStatus(0,pageable);
         List<Provider>  ll=new ArrayList<Provider>();
-        for ( int j=0;j<l.size();j++)
-        {   Provider ss=new Provider();
-            ss.setName(l.get(j).getName());
-            ss.setStatus(l.get(j).getStatus());
-            ss.setEmail(l.get(j).getEmail());
-            ss.setEmailsociety(l.get(j).getEmailsociety());
-            ss.setPhone(l.get(j).getPhone());
-            ss.setId(l.get(j).getId());
-            ss.setFirstname(l.get(j).getFirstname());
-            ss.setLastname(l.get(j).getLastname());
+        Iterator<Provider> it =l.iterator();
+        while (it.hasNext())
+        {
+            Provider provider=it.next();
+            Provider ss=new Provider();
+            ss.setName(provider.getName());
+            ss.setStatus(provider.getStatus());
+            //System.out.println("provider :"+ss.getStatus()+ " "+l.get(j).getStatus());
+            ss.setEmail(provider.getEmail());
+            ss.setEmailsociety(provider.getEmailsociety());
+            ss.setPhone(provider.getPhone());
+            ss.setId(provider.getId());
+            ss.setFirstname(provider.getFirstname());
+            ss.setLastname(provider.getLastname());
 
             //  System.out.println("provider :"+ss.getLastname()+ " "+l.get(j).getLastname());
-            ss.setPricesubscription(l.get(j).getPricesubscription());
+            ss.setPricesubscription(provider.getPricesubscription());
             ll.add(ss);
             // System.out.println("$$$$$"+ll.get(j).getName());
 
         }
-        return ll;
+        return  new PageImpl<>(ll, pageable, ll.size());
     }
     @Override
-    public List<Provider> newproviders() {
-        List<Provider>  l=providerRepository.findAllByStatus(2);
+    public Page<Provider> newproviders(Pageable pageable) {
+        Page<Provider>  l=providerRepository.findAllByStatus(2,pageable);
         List<Provider>  ll=new ArrayList<Provider>();
-        for ( int j=0;j<l.size();j++)
-        {   Provider ss=new Provider();
-            ss.setName(l.get(j).getName());
-            ss.setStatus(l.get(j).getStatus());
-            ss.setEmail(l.get(j).getEmail());
-            ss.setEmailsociety(l.get(j).getEmailsociety());
-            ss.setPhone(l.get(j).getPhone());
-            ss.setId(l.get(j).getId());
-            ss.setFirstname(l.get(j).getFirstname());
-            ss.setLastname(l.get(j).getLastname());
+        Iterator<Provider> it =l.iterator();
+        while (it.hasNext())
+        {
+            Provider provider=it.next();
+            Provider ss=new Provider();
+            ss.setName(provider.getName());
+            ss.setStatus(provider.getStatus());
+            //System.out.println("provider :"+ss.getStatus()+ " "+l.get(j).getStatus());
+            ss.setEmail(provider.getEmail());
+            ss.setEmailsociety(provider.getEmailsociety());
+            ss.setPhone(provider.getPhone());
+            ss.setId(provider.getId());
+            ss.setFirstname(provider.getFirstname());
+            ss.setLastname(provider.getLastname());
 
             //  System.out.println("provider :"+ss.getLastname()+ " "+l.get(j).getLastname());
-            ss.setPricesubscription(l.get(j).getPricesubscription());
+            ss.setPricesubscription(provider.getPricesubscription());
             ll.add(ss);
             // System.out.println("$$$$$"+ll.get(j).getName());
 
         }
-        return ll;
+        return  new PageImpl<>(ll, pageable, ll.size());
     }
 
     //add

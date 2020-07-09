@@ -2,6 +2,8 @@ package client_back1.demo.rest;
 
 import client_back1.demo.entity.*;
 import client_back1.demo.service.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,27 +36,31 @@ public class AdminController {
 
     //blocked and no blocked
     @GetMapping("/admin/Allproviders")
-    public List<Provider> findAll() {
-
-        return adminService.findAll();
+    public Page<Provider> findAll(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                  @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        PageRequest request = PageRequest.of(page - 1, size);
+        return adminService.findAll(request);
     }
     //all not blocked
     @GetMapping("/admin/Not-blocked-providers")
-    public List<Provider> findAllnotblocked() {
-
-        return adminService.findAllnotblocked();
+    public Page<Provider> findAllnotblocked(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        PageRequest request = PageRequest.of(page - 1, size);
+        return adminService.findAllnotblocked(request);
     }
     //all  blocked
     @GetMapping("/admin/blocked-providers")
-    public List<Provider> findAllblocked() {
-
-        return adminService.findAllblocked();
+    public Page<Provider> findAllblocked(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        PageRequest request = PageRequest.of(page - 1, size);
+        return adminService.findAllblocked(request);
     }
     //all new providers
     @GetMapping("/admin/new-providers")
-    public List<Provider> newproviders() {
-
-        return adminService.newproviders();
+    public Page<Provider> newproviders(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                       @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        PageRequest request = PageRequest.of(page - 1, size);
+        return adminService.newproviders(request);
     }
     //getprovider blocked and not
     @GetMapping("/admin/provider/{productId}")
@@ -85,8 +91,11 @@ public class AdminController {
     }
     /////// all products provider(blocked..)
     @GetMapping("/admin/All-products/{id}")
-    public List<Product> productsproAd(@PathVariable("id") long id){
-        return adminService.ProductprovidAd(id);
+    public Page<Product> productsproAd(@PathVariable("id") long id,@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                       @RequestParam(value = "size", defaultValue = "10") Integer size){
+        PageRequest request = PageRequest.of(page - 1, size);
+        return adminService.ProductprovidAd(id,request);
+
     }
     //delete provider -1 not in db
     @DeleteMapping("/admin/delete_provider/{id}")
@@ -109,87 +118,4 @@ public class AdminController {
     }
 
 
-//////////////////////////
-/*
-    @PostMapping("/addproductt")
-    public Product addProduct(@RequestParam("imageFile") MultipartFile image, @RequestParam("File") MultipartFile file) throws IOException {
- Product product=new Product();
-//this.imageUploadController.uplaodImage(image);
-return product;
-    }*/
-
-    /*@GetMapping("/{id}")
-    public Product getProduct(@PathVariable Long id) {
-        return this.productService.getProduct(id);
-    }
-
-    @PostMapping("/addproduct")
-    public Product addProduct(@Valid @RequestBody Product product)
-    {
-        return this.providerService.addProduct(product);
-    }
-    @GetMapping("/getproduct/{id}")
-    public Product getProduct(@Valid @PathVariable long id) {
-        return this.providerService.getProduct(id);
-    }*/
-
-/* @PutMapping("/updateProfil")
-    public boolean updateProfil(@Valid @PathVariable long id, @Valid @RequestBody Provider provider) {
-        return this.providerService.updateProfil(id,provider);
-    }
-    @GetMapping("/getProfil/{id}")
-    public Provider getPRovider(@Valid @PathVariable("id") long id){
-        return this.providerService.getProvider(id);
-    }
-    @PostMapping("/addproduct/{id}")
-    public Product addProduct(@PathVariable("id") long id, @RequestParam("product") String productStr,@Valid @RequestParam("images") MultipartFile[] images) {
-        Product product = new Gson().fromJson(productStr, Product.class);
-       // System.out.println(getPRovider(id).getFirstname());
-       // product.setProvider(getPRovider(id));
-        Product product1= this.providerService.addProduct(product);
-        List<Image> liste=Image.convertToImage(images,product1);
-        List<Image> temp=new ArrayList<Image>();
-        for(int i=0;i<liste.size();i++)
-            temp.add(new Image());
-        product1.setImages(temp);
-        Product product2= this.providerService.updateProduct(product1.getId(),product1);
-        for (int i=0;i<liste.size();i++) {
-            liste.get(i).setId(product2.getImages().get(i).getId());
-        }
-        for (Image image: liste) {
-            this.imageService.updateImage(image);
-        }
-        Product product3= this.providerService.getProduct(product2.getId());
-        for ( MultipartFile image: images) {
-            this.imageStorageService.storeImage(image,product);
-        }
-        this.imageController.uploadMultipleFiles(product3,images);
-        return product3;
-    }
-    @PostMapping("/addproduct")
-    public Product addProduct(@RequestParam("product") String productStr){
-        Product product = new Gson().fromJson(productStr, Product.class);
-        System.out.println("ggg"+product);
-        return this.providerService.addProduct(product);
-    }
-    @PutMapping("/updateproduct")
-
-    public Product updateProduct(@Valid @PathVariable long idProduct, @Valid @RequestBody Product newProduct) {
-        return this.providerService.updateProduct(idProduct,newProduct);
-    }
-
-    @DeleteMapping("/deleteproduct")
-    public boolean deleteProduct(@Valid @PathVariable long id) {
-        return  this.providerService.deleteProduct(id);
-    }
-
-    @GetMapping("/getproduct/{id}")
-    public Product getProduct(@Valid @PathVariable long id) {
-        return this.providerService.getProduct(id);
-    }
-
-    @GetMapping("/specialities")
-    public List<Speciality> getAllSpecialitys() {
-        return this.providerService.getAllSpecialitys();
-    }*/
 }

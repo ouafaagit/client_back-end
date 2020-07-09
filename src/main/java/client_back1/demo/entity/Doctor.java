@@ -6,7 +6,9 @@ import lombok.Data;
 import javax.persistence.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -64,12 +66,12 @@ private Cart cart;
 			joinColumns = @JoinColumn(name = "wishlist_id"),
 			inverseJoinColumns = @JoinColumn(name = "product_id"))
 
-	List<Product> wishlist=new ArrayList<Product>();
+	Set<Product> wishlist=new HashSet<Product>();
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(	name = "order_product",
 			joinColumns = @JoinColumn(name = "order_id"),
 			inverseJoinColumns = @JoinColumn(name = "product_id"))
-	List<Product> orderproduct=new ArrayList<Product>();
+	List<Product> orderproduct=new ArrayList<>();
 
 	public Doctor() {
 		super();
@@ -127,19 +129,12 @@ private Cart cart;
 		return orderproduct;
 	}
 
-	public List<Product> addWishlist(Product p) {
-		wishlist.add(p);
-		return wishlist;
-	}
-	public List<Product> deleteWishlist(Product p) {
-		wishlist.remove(p);
-		return wishlist;
-	}
-	public List<Product> getWishlist() {
+
+	public Set<Product> getWishlist() {
 		return wishlist;
 	}
 
-	public void setWishlist(List<Product> wishlist) {
+	public void setWishlist(Set<Product> wishlist) {
 		this.wishlist = wishlist;
 	}
 

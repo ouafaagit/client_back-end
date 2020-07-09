@@ -1,19 +1,22 @@
 package client_back1.demo.rest;
 
-import client_back1.demo.entity.Complaint;
-import client_back1.demo.entity.Product;
+import client_back1.demo.entity.*;
+import client_back1.demo.form.ItemForm;
 import client_back1.demo.service.ComplaintService;
 import client_back1.demo.service.ProductService;
 import client_back1.demo.service.SpecialityService;
 import client_back1.demo.vo.request.cardproduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -53,23 +56,32 @@ public class ProductController {
     //// for home
     //no blocked
     @GetMapping("/Allproducts")
-    public List<cardproduct> findAllproducts() {
+    public Page<cardproduct> findAllproducts(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                             @RequestParam(value = "size", defaultValue = "18")Integer size) {
+        PageRequest request = PageRequest.of(page - 1, size);
 
-        return productService.findAllproducts();
+        return productService.findAllproducts(request);
     }
     //// for home
     //no blocked
     @GetMapping("/Allproducts/{id}")
-    public List<cardproduct> findAllbysp(@PathVariable("id") long id) {
-
-        return productService.findAllbysp(id);
+    public Page<cardproduct> findAllbysp(@PathVariable("id") long id,@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                         @RequestParam(value = "size", defaultValue = "18") Integer size) {
+        PageRequest request = PageRequest.of(page - 1, size);
+        //return productService.findAllbysp(id);
+        List<cardproduct>cardproducts=productService.findAllbysp(id,request);
+System.out.println(" :::findAllbysp"+cardproducts.size());
+        return new PageImpl<>(cardproducts, request, cardproducts.size());
     }
     //// for home new products
     //no blocked
     @GetMapping("/Allnewprod")
-    public List<cardproduct> Allnewprod() {
+    public Page<cardproduct> Allnewprod(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                        @RequestParam(value = "size", defaultValue = "18") Integer size) {
+        PageRequest request = PageRequest.of(page - 1, size);
+        List<cardproduct>cardproducts=productService.Allnewprod(request);
 
-        return productService.Allnewprod();
+         return new PageImpl<>(cardproducts, request, cardproducts.size());
     }
     @GetMapping("/Diagnostic-new")
     public List<cardproduct> Diagnostinew()
@@ -152,9 +164,12 @@ public Product getUpProduct(@PathVariable("productId") long productId)
     ////////////////////////admin////////////
     //blocked and no blocked
     @GetMapping("/admin/Allproducts")
-    public List<Product> findAll() {
+    public Page<Product> findAll(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                 @RequestParam(value = "size", defaultValue = "18")Integer size) {
+        PageRequest request = PageRequest.of(page - 1, size);
 
-        return productService.findAll();
+       List<Product>  l= productService.findAll(request);
+        return  new PageImpl<>(l, request, l.size());
     }
     //getproduct blocked and not
     @GetMapping("/admin/product/{productId}")
@@ -183,5 +198,7 @@ public Product getUpProduct(@PathVariable("productId") long productId)
         productService.delete(productId);
         return productId;
     }
+
+
 
 }

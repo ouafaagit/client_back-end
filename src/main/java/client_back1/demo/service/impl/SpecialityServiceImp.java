@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @Service
@@ -62,19 +60,44 @@ public class SpecialityServiceImp  implements SpecialityService {
 //////provider_shoose list /////
 //for home
 public List<Speciality> shooselist(long id) {
-        Provider p=new Provider(id);
-    List<Speciality>  l=specialityRepositor.findAllByStatusTrueAndProvidersIdNot(id);
+        Provider p=providerRepository.findByIdAndStatus(id,1);
+    List<Speciality>  l=specialityRepositor.findAllByStatusTrue();
+    System.out.println("shooselist for provider speciality");
     List<Speciality>  ll=new ArrayList<Speciality>();
-    for ( int j=0;j<l.size();j++)
-    {   Speciality ss=new Speciality();
-        ss.setName(l.get(j).getName());
-        ss.setId(l.get(j).getId());
-        ss.setPriceSpeciality(l.get(j).getPriceSpeciality());
-        ll.add(ss);
-        // System.out.println("$$$$$"+ll.get(j).getName());
-
-    }
+    l.forEach(speciality -> {
+        Set<Speciality> Specialities=p.getSpecialities();
+        Optional<Speciality> pro = Specialities.stream().filter(e -> speciality.getId()== e.getId()).findFirst();
+        if (pro.isPresent())
+        { System.out.println(" ***present");
+        }else {
+            System.out.println(" ***wishlist.contains(product) :"+speciality.getName());
+            Speciality ss=new Speciality();
+            ss.setName(speciality.getName());
+            ss.setId(speciality.getId());
+            ss.setPriceSpeciality(speciality.getPriceSpeciality());
+            ll.add(ss);
+        }
+    });
     return ll;
+
+
+  /*  l.forEach(speciality -> {
+
+        Iterator<Speciality> it =p.getSpecialities().iterator();
+        while (it.hasNext())
+        {
+            Speciality s=it.next();
+            if (s.getId()!=speciality.getId())
+            {
+                Speciality ss=new Speciality();
+                ss.setName(s.getName());
+                ss.setId(s.getId());
+                ss.setPriceSpeciality(s.getPriceSpeciality());
+                ll.add(ss);
+            }}
+
+    });
+    return ll;*/
      /*    Iterator<Speciality> itr = l.iterator();
         //Speciality sl= new Speciality();
        Speciality sl;

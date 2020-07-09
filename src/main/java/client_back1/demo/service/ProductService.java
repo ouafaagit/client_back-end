@@ -15,7 +15,7 @@ public interface ProductService {
     Product getproductUp(long productId);
 
     /// One product by speciality name findAllByBlockedIsFalseAndSpecialityName
-    Page<Product> getproducts_sp(String name, Pageable pageable);
+    Page<Product> getproducts_sp(String name,Pageable pageable);
 
     Product findOne(long productId);
 
@@ -28,7 +28,7 @@ public interface ProductService {
     ///Get product detail
     Product getproductAd(long productId);
 
-    List<Product> findAll();
+    List<Product> findAll(Pageable pageable);
 
     //bolck product
     void offSale(long productId);
@@ -64,13 +64,13 @@ public interface ProductService {
 
     List<cardproduct> tendancnew();
 
-    List<cardproduct> findAllproducts();
+    Page<cardproduct> findAllproducts(Pageable pageable);
 
     Product quickview(long productId);
 
     List<cardproduct> relatedprod(long spcialityid);
 
-    List<cardproduct> Allnewprod();
+    List<cardproduct> Allnewprod(Pageable pageable);
 
-    List<cardproduct> findAllbysp(long id);
+    List<cardproduct> findAllbysp(long id,Pageable pageable);
 }

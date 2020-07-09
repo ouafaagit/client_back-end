@@ -24,8 +24,8 @@ public interface ProviderRepository extends JpaRepository<Provider,Long> {
     Provider  findByIdAndStatusNot(long providerId, int n);
     Provider findByEmailAndStatusNot(String email,int n);
     //all provider not -1
-    List<Provider> findAllByStatusNot(int i);
-    List<Provider> findAllByStatus(int i);
+    Page<Provider> findAllByStatusNot(int i,Pageable pageable);
+    Page<Provider> findAllByStatus(int i,Pageable pageable);
     List<Provider> findAllByStatusGreaterThanEqual(int i);
     /////////////////////////////////////////////
 //Page<Product> getAllByProduct();

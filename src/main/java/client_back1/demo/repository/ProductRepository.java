@@ -19,6 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Product findById(long productId);
     // product all for admin
     List<Product> findAll();
+    Page<Product> findAll(Pageable pageable);
 
     //for provider pas utilise
   //  Product findByIdAndBlockedIsFalseAndProvider_IdAndProvider_Status(long productId,long ids, int n);
@@ -28,12 +29,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Product findByIdAndBlockedIsFalse(long productId);
     //List<Product> findAllByBlockedIsFalseAndSpeciality_NameAndOrderByOrderDesc(String s);
     List<Product> findAllByBlockedIsFalseAndSpeciality_NameAndNombreVueLessThan(String sn ,double i);
+    List<Product> findAllByBlockedIsFalseAndSpeciality_NameAndNombreVueGreaterThan(String sn ,double i);
     List<Product> findAllByBlockedIsFalseAndSpeciality_Name(String sn);
+    List<Product> findAllByBlockedIsFalseAndSpecialityEquals(String sn,Pageable pageable);
+    Page<Product> findAllByBlockedIsFalseAndSpeciality_Id(long sn,Pageable pageable);
     List<Product> findAllByBlockedIsFalseAndSpeciality_Id(long sn);
-    List<Product> findAllByBlockedIsFalseAndSpeciality_NameAndNombreVueGreaterThan(String s,double i);
+   // List<Product> findAllByBlockedIsFalseAndSpeciality_NameAndNombreVueGreaterThan(String s,double i);
 
     List<Product> findAllByBlockedIsFalseAndSpeciality_NameNotAndNombreVueLessThan(String s,double i);
-    List<Product> findAllByBlockedIsFalseAndNombreVueNotNullAndSpeciality_NameNot(String s);
+    List<Product> findAllByBlockedIsFalseAndNombreVueNotNullAndSpeciality_NameNotAndNombreVueGreaterThan(String s,double i);
     List<Product> findAllByBlockedIsFalseAndSpeciality_NameNot(String s);
    // List<Product> findAllByBlockedIsFalseAndOrderByOrderNombreVueDesc();
    List<Product> findAllByBlockedFalseAndAndNombreVueGreaterThanEqual(double i);
@@ -41,13 +45,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
    // Page<Product> findAllByBlockedIsFalsedOrderByIdIdAsc( Pageable pageable);
     Page<Product> findAllByBlockedFalse( Pageable pageable);
     List<Product> findAllByBlockedFalse();
-    List<Product> findAllByBlockedFalseAndAndNombreVueLessThanEqual(double i);
+    Page<Product> findAllByBlockedFalseAndAndNombreVueLessThanEqual(double i,Pageable pageable);
     // products by speciality name
     Page<Product> findAllByBlockedIsFalseAndSpecialityName( String name,Pageable pageable);
 
     ///////////////  products of provider//////////////
     List<Product> findAllByBlockedIsFalseAndProvider_Id(long provider);
-    List<Product> findAllByProvider_Id(long provider);
+    Page<Product> findAllByProvider_Id(long provider,Pageable pageable);
     List<Product> findAllByBlockedIsFalseAndProvider_IdAndSpecialityId(long provider,long id);
     //product by speciality user or provider
   //  Page<Product>  findAllBySpeciality_NameAndBlockedIsFalse(String speciality, Pageable pageable);

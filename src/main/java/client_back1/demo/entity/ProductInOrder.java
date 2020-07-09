@@ -81,6 +81,7 @@ public class ProductInOrder {
         this.productMarque = productInfo.getMarque();
         this.productReference = productInfo.getReference();
       //  this.productIcon = productInfo.getPr_images().get(0).getPicByte();
+
      this.productIcon = productInfo.getPr_images().get(0);
         this.productTyp = productInfo.getSpeciality().getName();
         this.count = quantity;
